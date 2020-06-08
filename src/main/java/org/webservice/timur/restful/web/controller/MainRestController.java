@@ -28,27 +28,33 @@ public class MainRestController {
      * с уазанным значением id.
      *
      * @param roomId   идентификатор комнаты
-     * @param occupied статус занятости
+     * @param entrance статус занятости комнаты (возможность войти в нее для указанного пользователя)
      * @param keyId    идентификатор пользователя
-     * @return
+     * @return ответ от сервера
      */
     @GetMapping("/check")
     public ResponseEntity<Response> check(
             @RequestParam(value = "roomId") long roomId,
-            @RequestParam(value = "entrance") boolean occupied,
+            @RequestParam(value = "entrance") boolean entrance,
             @RequestParam(value = "keyId") long keyId
     ) {
         //пример запроса к серверу
         //http://localhost:8080/check?roomId=1&entrance=true&keyId=1
         log.info("Query of the room occupation check " + roomId + " by user with id " + keyId + " initialized.");
 
-        EntranceServiceEntity entity = entranceServiceDao.checkRoomOccupation(roomId, keyId, occupied);
+        EntranceServiceEntity entity = entranceServiceDao.checkRoomOccupation(roomId, keyId, entrance);
         Response response = Response.builder().build();
 
-        if (entity.getRoom() != null && !occupied) {
+        if (entity.getRoom() != null && !entity.isOccupied()) {
             response.setHttpStatus(HttpStatus.OK.value());
             response.setHttpStatusLabel(HttpStatus.OK.toString());
             response.setMessage("Room " + roomId + " is empty.");
+        } else if (entity.getRoom() != null && entity.getUser().getId() == keyId) {
+            response.setHttpStatus(HttpStatus.OK.value());
+            response.setHttpStatusLabel(HttpStatus.OK.toString());
+            response.setMessage("Room(" + entity.getRoom().getId() + "," + entity.getRoom().getName()
+                    + ")  is indeed occupied by User(" + entity.getUser().getId() + "," + entity.getUser().getName()
+                    + "). You may leave the room.");
         } else {
             response.setHttpStatus(HttpStatus.FORBIDDEN.value());
             response.setHttpStatusLabel(HttpStatus.FORBIDDEN.toString());
@@ -60,6 +66,12 @@ public class MainRestController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Запрос на вход в свободную комнату для пользователя с указанным id.
+     *
+     * @param id идентификатор пользователя
+     * @return ответ от сервера
+     */
     @GetMapping("/enter/{id}")
     public ResponseEntity<Response> enter(
             @PathVariable(value = "id") long id
@@ -74,6 +86,12 @@ public class MainRestController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Запрос на выход из комнаты для пользователя с указанным id.
+     *
+     * @param id идентификатор пользователя
+     * @return ответ от сервера
+     */
     @GetMapping("/leave/{id}")
     public ResponseEntity<Response> leave(
             @PathVariable(value = "id") long id
@@ -88,6 +106,11 @@ public class MainRestController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Тестовое апи для тестирования занятости всех комнат и каким именно пользователем.
+     *
+     * @return все комнаты и  их заселенность
+     */
     @GetMapping("/checkAll")
     public ResponseEntity<List<EntranceServiceEntity>> checkAll() {
         return new ResponseEntity<>(entranceServiceDao.findAll(), HttpStatus.OK);

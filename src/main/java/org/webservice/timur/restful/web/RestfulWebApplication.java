@@ -33,7 +33,7 @@ public class RestfulWebApplication {
                     .limit(10000)
                     .forEach(a -> userRepository.save(new User("User" + a)));
 
-            //тест инициализации нескольких пользователей с выводом в логи
+            //тест успешной инициализации нескольких произвольных пользователей с выводом в логи
             log.info(userRepository.findById(10));
             log.info(userRepository.findByName("User1"));
             log.info(userRepository.findByName("User10000"));

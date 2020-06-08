@@ -122,7 +122,7 @@ public class Scanner {
         try {
             response = mapper.readValue(str, Response.class);
         } catch (JsonProcessingException e) {
-            log.error("Error while JsonProcessing occurred {}", e.getCause());
+            log.error("Error while JsonProcessing occurred {}.", e.getCause().getMessage());
         }
         return response;
     }
@@ -145,9 +145,9 @@ public class Scanner {
     }
 
     /**
-     * Жизнь коротка... слишком много времени отняло у меня задание...
+     * Жизнь коротка... слишком много времени отняло у меня само задание...
      * Поэтому тесты писать не стал, если нужно будет, тогда можно будет добавить.
-     * Пока можно запустить main при стартованном сервере.
+     * Пока можно запустить метод main при стартованном сервере и проверить выходные данные.
      * TODO может быть добавить тесты, хз...
      */
     public static void main(String[] args) {

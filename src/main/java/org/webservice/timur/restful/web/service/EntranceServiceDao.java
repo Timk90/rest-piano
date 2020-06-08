@@ -13,10 +13,10 @@ public interface EntranceServiceDao {
      *
      * @param roomId   идентифиатор комнаты
      * @param keyId    идентификатор пользователя
-     * @param occupied предполагаемое состояние комнаты
+     * @param entrance предполагаемое состояние комнаты (возможность входа)
      * @return сущность, содержащую данные о комнате и пользователе в ней
      */
-    EntranceServiceEntity checkRoomOccupation(long roomId, long keyId, boolean occupied);
+    EntranceServiceEntity checkRoomOccupation(long roomId, long keyId, boolean entrance);
 
     /**
      * Анализ возможности войти в свободную комнату для пользователя с указанным id.

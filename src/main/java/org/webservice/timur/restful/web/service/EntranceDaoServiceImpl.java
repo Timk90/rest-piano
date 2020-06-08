@@ -23,14 +23,18 @@ import org.webservice.timur.restful.web.model.entity.Room;
 import org.webservice.timur.restful.web.model.entity.User;
 import org.webservice.timur.restful.web.service.types.RoomState;
 
+/**
+ * Имплементация для {@link EntranceServiceDao}
+ */
 @Log4j2
 @Service
 public class EntranceDaoServiceImpl implements EntranceServiceDao {
 
+    /**
+     * Для работы с репозиториями всех сущностей.
+     */
     UserRepository userRepository;
-
     EntranceServiceEntityRepository entranceServiceEntityRepository;
-
     RoomRepository roomRepository;
 
     @Autowired
@@ -44,14 +48,18 @@ public class EntranceDaoServiceImpl implements EntranceServiceDao {
     }
 
     @Override
-    public EntranceServiceEntity checkRoomOccupation(long roomId, long keyId, boolean occupied) {
+    public EntranceServiceEntity checkRoomOccupation(long roomId, long keyId, boolean entrance) {
+
+        //внутреннее представление формата хранения данных немного отличается.
+        //Если можно войти в дверь, значит там не занято, т.е. значение occupied = false.
+        boolean occupied = !entrance;
 
         Room room = roomRepository.findById(roomId);
         if (room != null) {
             log.info("Room retrieved from DB by Id {} is {}.", room.getId(), room.getName());
         } else {
             log.info("Room with Id {} has not been found in DB.", roomId);
-            throw new InternalServerException("Room not found.");
+            throw new InternalServerException("Room " + roomId + " not found.");
         }
 
         User user = userRepository.findById(keyId);
@@ -72,17 +80,16 @@ public class EntranceDaoServiceImpl implements EntranceServiceDao {
             EntranceServiceEntity entity = entityRoomOccupation.get(0);
             if (occupied) {
                 if (entity.getUser().getId() == user.getId()) {
-                    log.info("Room {} is actually occupied by User(id:{}, name:{})",
+                    log.info("Room {} is actually occupied by User(id:{}, name:{}). You may leave the room.",
                             entity.getRoom().getName(), user.getId(), user.getName());
-                    throw new RoomHasAnotherOccupationStateException("Room " + entity.getRoom().getName()
-                            + " is actually occupied by User(id:" + user.getId() + "), name:" + user.getName());
+                    return entity;
                 } else {
                     log.info("Room {} isn't occupied by User(id:{},name:{}) however occupied by User(id:{},name:{})",
                             entity.getRoom().getName(), user.getId(), user.getName(),
                             entity.getUser().getId(), entity.getUser().getName());
                     throw new RoomHasAnotherOccupationStateException("Room " + entity.getRoom().getName()
-                            + " isn't occupied by User(id:" + user.getId() + "), name:" + user.getName()
-                            + " however occupied by User(id:" + entity.getUser().getId() + ", name:"
+                            + " isn't occupied by User(id:" + user.getId() + ", name:" + user.getName()
+                            + "), however occupied by User(id:" + entity.getUser().getId() + ", name:"
                             + entity.getUser().getName() + ").");
                 }
             } else {
@@ -115,11 +122,11 @@ public class EntranceDaoServiceImpl implements EntranceServiceDao {
             log.info("User retrieved from DB by Id {} has Name: {}.", user.getId(), user.getName());
         } else {
             log.info("User with Id {} has not been found in DB", keyId);
-            throw new UserNotFoundException("Not found by id" + keyId);
+            throw new UserNotFoundException("Not found by id " + keyId);
         }
         if (!entranceServiceEntityRepository.findByUser(user).isEmpty()) {
             log.info("User with Id {} has not been found in DB", keyId);
-            throw new UserAlreadyOccupiedAnotherRoomException("User with id" + keyId + " is found in another room.");
+            throw new UserAlreadyOccupiedAnotherRoomException("User with id " + keyId + " is found in another room.");
         }
         int roomNumber = calculateRoomNumberForKeyID(keyId);
         if (roomNumber > 0) {
@@ -144,7 +151,7 @@ public class EntranceDaoServiceImpl implements EntranceServiceDao {
         } else {
             log.info("User: id = {}, name = {} cannot enter any room. All rooms are occupied at the moment.",
                     user.getId(), user.getName());
-            throw new NoEmptyRoomAvailableException("No available room is present at the moment.");
+            throw new NoEmptyRoomAvailableException("No available room presents at the moment.");
         }
     }
 

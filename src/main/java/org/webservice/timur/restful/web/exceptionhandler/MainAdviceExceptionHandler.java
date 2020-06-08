@@ -15,14 +15,14 @@ import org.webservice.timur.restful.web.exceptionhandler.exception.UserNotFoundI
 import org.webservice.timur.restful.web.model.response.Response;
 
 /**
- * Контроллер с аспектами обрабатывающими различные ошибки (исключение).
+ * Контроллер с аспектами обрабатывающими различные ошибки (исключения), возникающие на сервере.
  * Формирует ответ с ошибкой на запрос клиента.
  */
 @ControllerAdvice
 public class MainAdviceExceptionHandler {
 
     /**
-     * Обрабаотывает ошибки типа "Пользователь е найден в БД".
+     * Обрабаотывает ошибки типа "Пользователь не найден в БД".
      *
      * @param ex исключение
      * @return ответ с ошибкой клиенту

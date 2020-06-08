@@ -34,7 +34,7 @@ class RestfulWebApplicationTests {
      */
     @Test
     void testCheckMethod() throws Exception {
-        String urlString = "?roomId=1&entrance=false&keyId=1";
+        String urlString = "?roomId=1&entrance=true&keyId=1";
         this.mockMvc.perform(get("/check" + urlString)).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Room 1 is empty.")));
